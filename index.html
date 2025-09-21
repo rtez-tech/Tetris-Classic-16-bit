@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Block Adventure - Tetris</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #FFB6C1 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 4px solid #4169E1;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .game-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-area {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .main-game {
+            position: relative;
+        }
+        
+        #gameCanvas {
+            border: 3px solid #2C3E50;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #1a1a2e;
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 200px;
+        }
+        
+        .info-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            border: 2px solid #4a5568;
+        }
+        
+        .info-panel h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #FFD700;
+        }
+        
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00FF7F;
+        }
+        
+        .level-display {
+            font-size: 1.3rem;
+            color: #FF69B4;
+        }
+        
+        .next-piece-canvas {
+            border: 2px solid #4a5568;
+            border-radius: 5px;
+            background: #2C3E50;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .controls-panel {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            border: 2px solid #4a5568;
+        }
+        
+        .controls-panel h3 {
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .control-key {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .game-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .game-btn {
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .pause-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+        
+        .pause-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid #FF6B6B;
+            display: none;
+        }
+        
+        .game-over h2 {
+            color: #FF6B6B;
+            margin-bottom: 15px;
+            font-size: 2rem;
+        }
+        
+        .game-over p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .mobile-controls {
+            display: none;
+            margin-top: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+        }
+        
+        .mobile-btn {
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        
+        .mobile-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #44A08D 0%, #4ECDC4 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .side-panel {
+                flex-direction: row;
+                min-width: auto;
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .mobile-controls {
+                display: grid;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            .game-title {
+                font-size: 1.5rem;
+            }
+            
+            #gameCanvas {
+                width: 300px;
+                height: 600px;
+            }
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container floating">
+        <h1 class="game-title">🎮 Retro Block Adventure 🎮</h1>
+        
+        <div class="game-area">
+            <div class="main-game">
+                <canvas id="gameCanvas" width="400" height="800"></canvas>
+                <div id="gameOver" class="game-over">
+                    <h2>Game Over!</h2>
+                    <p>Final Score: <span id="finalScore">0</span></p>
+                    <button class="game-btn start-btn" onclick="game.restart()">Play Again</button>
+                </div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="info-panel">
+                    <h3>Score</h3>
+                    <div class="score-display" id="scoreDisplay">0</div>
+                    
+                    <h3 style="margin-top: 15px;">Level</h3>
+                    <div class="level-display" id="levelDisplay">1</div>
+                    
+                    <h3 style="margin-top: 15px;">Lines</h3>
+                    <div class="level-display" id="linesDisplay">0</div>
+                    
+                    <h3 style="margin-top: 15px;">Next Piece</h3>
+                    <canvas id="nextPieceCanvas" class="next-piece-canvas" width="120" height="120"></canvas>
+                </div>
+                
+                <div class="controls-panel">
+                    <h3>Controls</h3>
+                    <div class="control-item">
+                        <span>Move Left</span>
+                        <span class="control-key">A / ←</span>
+                    </div>
+                    <div class="control-item">
+                        <span>Move Right</span>
+                        <span class="control-key">D / →</span>
+                    </div>
+                    <div class="control-item">
+                        <span>Rotate</span>
+                        <span class="control-key">W / ↑</span>
+                    </div>
+                    <div class="control-item">
+                        <span>Soft Drop</span>
+                        <span class="control-key">S / ↓</span>
+                    </div>
+                    <div class="control-item">
+                        <span>Hard Drop</span>
+                        <span class="control-key">Space</span>
+                    </div>
+                    <div class="control-item">
+                        <span>Hold Piece</span>
+                        <span class="control-key">C</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-buttons">
+            <button class="game-btn start-btn" id="startBtn" onclick="game.start()">Start Game</button>
+            <button class="game-btn pause-btn" id="pauseBtn" onclick="game.togglePause()">Pause</button>
+        </div>
+        
+        <div class="mobile-controls" id="mobileControls">
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('rotate')">↻</button>
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('up')">↑</button>
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('hold')">Hold</button>
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('left')">←</button>
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('down')">↓</button>
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('right')">→</button>
+            <button class="mobile-btn" onpointerdown="game.handleMobileControl('drop')" style="grid-column: span 3;">Hard Drop</button>
+        </div>
+    </div>
+    
+    <script src="src/tetris-pieces.js"></script>
+    <script src="src/game-engine.js"></script>
+    <script src="src/audio-manager.js"></script>
+    <script src="src/particle-effects.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
