@@ -3,44 +3,81 @@ let game;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    game = new GameEngine();
-    
-    // Setup mobile controls
-    setupMobileControls();
-    
-    // Add touch event handling for mobile
-    setupTouchControls();
-    
-    // Setup audio initialization on first user interaction
-    setupAudioInitialization();
-    
-    // Start the render loop even before game starts
-    game.render();
-    game.updateDisplay();
-    
-    console.log('🎮 Retro Block Adventure initialized!');
-    console.log('🎵 Audio system ready');
-    console.log('📱 Mobile controls configured');
-    console.log('✨ Particle system active');
+    try {
+        game = new GameEngine();
+        
+        // Setup mobile controls
+        setupMobileControls();
+        
+        // Add touch event handling for mobile
+        setupTouchControls();
+        
+        // Setup audio initialization on first user interaction
+        setupAudioInitialization();
+        
+        // Start the render loop even before game starts
+        game.render();
+        game.updateDisplay();
+        
+        console.log('🎮 Retro Block Adventure initialized!');
+        console.log('🎵 Audio system ready');
+        console.log('📱 Mobile controls configured');
+        console.log('✨ Particle system active');
+    } catch (error) {
+        console.error('Failed to initialize game:', error);
+        // Fallback initialization
+        setTimeout(() => {
+            try {
+                game = new GameEngine();
+                setupMobileControls();
+                setupTouchControls();
+                setupAudioInitialization();
+                game.render();
+                game.updateDisplay();
+            } catch (retryError) {
+                console.error('Retry failed:', retryError);
+            }
+        }, 100);
+    }
+});
+
+// Also try to initialize when window loads (fallback)
+window.addEventListener('load', () => {
+    if (!game) {
+        try {
+            game = new GameEngine();
+            setupMobileControls();
+            setupTouchControls();
+            setupAudioInitialization();
+            game.render();
+            game.updateDisplay();
+        } catch (error) {
+            console.error('Window load initialization failed:', error);
+        }
+    }
 });
 
 function setupMobileControls() {
     const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
     const mobileControls = document.getElementById('mobileControls');
     
-    if (isMobile) {
+    if (mobileControls && isMobile) {
         mobileControls.style.display = 'grid';
     }
     
     // Handle window resize
     window.addEventListener('resize', () => {
         const isMobileNow = window.innerWidth <= 768 || 'ontouchstart' in window;
-        mobileControls.style.display = isMobileNow ? 'grid' : 'none';
+        if (mobileControls) {
+            mobileControls.style.display = isMobileNow ? 'grid' : 'none';
+        }
     });
 }
 
 function setupTouchControls() {
     const canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+    
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartTime = 0;
@@ -56,7 +93,7 @@ function setupTouchControls() {
     canvas.addEventListener('touchend', (e) => {
         e.preventDefault();
         
-        if (!game.gameRunning || game.gamePaused) return;
+        if (!game || !game.gameRunning || game.gamePaused) return;
         
         const touch = e.changedTouches[0];
         const touchEndX = touch.clientX;
@@ -96,7 +133,7 @@ function setupTouchControls() {
 
 function setupAudioInitialization() {
     const initAudio = () => {
-        if (game.audioManager.audioContext && 
+        if (game && game.audioManager && game.audioManager.audioContext && 
             game.audioManager.audioContext.state === 'suspended') {
             game.audioManager.audioContext.resume();
         }
@@ -114,14 +151,14 @@ function setupAudioInitialization() {
 
 // Game state management
 window.addEventListener('visibilitychange', () => {
-    if (document.hidden && game.gameRunning && !game.gamePaused) {
+    if (game && document.hidden && game.gameRunning && !game.gamePaused) {
         game.togglePause();
     }
 });
 
 // Handle window focus/blur for pause functionality
 window.addEventListener('blur', () => {
-    if (game.gameRunning && !game.gamePaused) {
+    if (game && game.gameRunning && !game.gamePaused) {
         game.togglePause();
     }
 });
@@ -143,7 +180,7 @@ function logPerformance() {
     const now = performance.now();
     if (now - lastPerformanceLog > 5000) { // Log every 5 seconds
         lastPerformanceLog = now;
-        if (game.particleManager) {
+        if (game && game.particleManager) {
             const particleCount = game.particleManager.getParticleCount();
             if (particleCount > 0) {
                 console.log(`🎪 Active particles: ${particleCount}`);
@@ -179,28 +216,36 @@ document.addEventListener('keydown', (e) => {
     if (konamiCode.join(',') === konamiSequence.join(',')) {
         // Easter egg activated!
         console.log('🎊 Konami Code activated! Special effects enabled!');
-        game.particleManager.createLevelUpEffect(
-            game.canvas.width / 2, 
-            game.canvas.height / 2
-        );
-        game.audioManager.playSound('tetris');
+        if (game && game.particleManager) {
+            game.particleManager.createLevelUpEffect(
+                game.canvas.width / 2, 
+                game.canvas.height / 2
+            );
+        }
+        if (game && game.audioManager) {
+            game.audioManager.playSound('tetris');
+        }
         konamiCode = []; // Reset
         
         // Add some bonus score
-        if (game.gameRunning) {
+        if (game && game.gameRunning) {
             game.score += 1000;
             game.updateDisplay();
-            game.particleManager.createScoreText(
-                game.canvas.width / 2,
-                game.canvas.height / 2 - 60,
-                1000
-            );
+            if (game.particleManager) {
+                game.particleManager.createScoreText(
+                    game.canvas.width / 2,
+                    game.canvas.height / 2 - 60,
+                    1000
+                );
+            }
         }
     }
 });
 
 // Export game instance for debugging
-window.game = game;
+if (typeof window !== 'undefined') {
+    window.game = game;
+}
 window.debugMode = false;
 
 // Debug mode toggle
