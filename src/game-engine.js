@@ -40,13 +40,13 @@ class GameEngine {
     
     setupColors() {
         this.pieceColors = {
-            'I': '#00FFFF', // Cyan
-            'O': '#FFFF00', // Yellow  
-            'T': '#800080', // Purple
-            'S': '#00FF00', // Green
-            'Z': '#FF0000', // Red
-            'J': '#0000FF', // Blue
-            'L': '#FFA500'  // Orange
+            'I': '#3498db',  // Blue
+            'O': '#5dade2',  // Light Blue
+            'T': '#2980b9',  // Dark Blue
+            'S': '#85c1e9',  // Very Light Blue
+            'Z': '#1f4e79',  // Navy Blue
+            'J': '#4a90e2',  // Medium Blue
+            'L': '#74b9ff'   // Sky Blue
         };
         
         this.boardColors = {
