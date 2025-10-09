@@ -40,19 +40,19 @@ class GameEngine {
     
     setupColors() {
         this.pieceColors = {
-            'I': '#3498db',  // Blue
-            'O': '#5dade2',  // Light Blue
-            'T': '#2980b9',  // Dark Blue
-            'S': '#85c1e9',  // Very Light Blue
-            'Z': '#1f4e79',  // Navy Blue
-            'J': '#4a90e2',  // Medium Blue
-            'L': '#74b9ff'   // Sky Blue
+            'I': '#003d82',  // Red Bull Blue
+            'O': '#0066cc',  // Bright Blue
+            'T': '#db0a30',  // Red Bull Red
+            'S': '#003d82',  // Red Bull Blue
+            'Z': '#db0a30',  // Red Bull Red
+            'J': '#0066cc',  // Bright Blue
+            'L': '#db0a30'   // Red Bull Red
         };
-        
+
         this.boardColors = {
-            empty: '#1a1a2e',
-            filled: '#16213e',
-            border: '#2C3E50'
+            empty: '#001d4a',
+            filled: '#003d82',
+            border: '#db0a30'
         };
     }
     
@@ -441,7 +441,7 @@ class GameEngine {
     }
     
     renderNextPiece() {
-        this.nextPieceCtx.fillStyle = '#2C3E50';
+        this.nextPieceCtx.fillStyle = '#001d4a';
         this.nextPieceCtx.fillRect(0, 0, this.nextPieceCanvas.width, this.nextPieceCanvas.height);
         
         if (this.nextPiece) {
@@ -471,27 +471,27 @@ class GameEngine {
     render() {
         // Clear canvas with gradient background
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#1a1a2e');
-        gradient.addColorStop(0.5, '#16213e');
-        gradient.addColorStop(1, '#0f3460');
-        
+        gradient.addColorStop(0, '#001d4a');
+        gradient.addColorStop(0.5, '#003d82');
+        gradient.addColorStop(1, '#001d4a');
+
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         // Draw game board
         this.drawBoard();
-        
+
         // Draw current piece with shadow
         if (this.currentPiece) {
             this.drawGhostPiece();
             this.drawPiece(this.currentPiece);
         }
-        
+
         // Draw particles
         this.particleManager.render(this.ctx);
-        
+
         // Draw border
-        this.ctx.strokeStyle = '#4ECDC4';
+        this.ctx.strokeStyle = '#db0a30';
         this.ctx.lineWidth = 3;
         this.ctx.strokeRect(0, 0, this.canvas.width, this.canvas.height);
     }
