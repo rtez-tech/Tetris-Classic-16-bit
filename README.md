@@ -1,4 +1,4 @@
-# 🎮 Retro Block Adventure - Tetris
+# 🎮 Retro Adventure - Tetris
 
 A modern take on the classic Tetris game with retro-inspired visual and audio elements reminiscent of classic games. Built with vanilla JavaScript, HTML5 Canvas, and Web Audio API.
 See an example of game:
